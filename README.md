@@ -3,14 +3,14 @@
 ## Project structure
 
 - `configs/`
-	- `hyperparams.yaml` — training hyperparameters used by the model (learning rate, augmentation, loss gains, etc.).
+	- `hyperparams.yaml` — training hyperparameters used by the model.
 - `dataset/`
-	- `data.yaml` — dataset manifest describing `path`, `train`, `val`, `test`, `nc` (number of classes) and `names` (class labels).
+	- `data.yaml` — dataset configuration file describing `path`, `train`, `val`, `test`, `nc` (number of classes) and `names` (class labels).
     - Currently just a placeholder, soon to be replaced by the actual dataset
     - contents are ignored by gitignore because of size excecpt data.yaml
 - `src/`
-	- `train.py` — training script. Uses `ultralytics.YOLO` to train a model. Key CLI flags: `--model`, `--epochs`, `--patience`, `--imgsz`, `--batch`, `--device`.
-	- `detect.py` — inference script. Uses `ultralytics.YOLO` to run inference. Key CLI flags: `--model`, `--source`, `--conf`, `--save`, `--show`.
+	- `train.py` — training script. Uses `ultralytics.YOLO` to train a model.
+	- `detect.py` — inference script. Uses `ultralytics.YOLO` to run inference.
 - `requirements.txt` — CPU-only Python dependencies.
 - `requirements-gpu.txt` — GPU (CUDA) compatible dependencies (points at PyTorch CUDA wheel index). Use only if you have matching NVIDIA drivers/CUDA.
 
