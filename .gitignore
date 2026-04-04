@@ -1,0 +1,42 @@
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Training outputs
+runs/
+
+#ignore dataset if too big
+dataset/
+
+# Model checkpoints
+*.pt
+*.pth
+*.weights
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local
