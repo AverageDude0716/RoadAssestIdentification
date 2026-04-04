@@ -1,29 +1,23 @@
 # RoadAssestIdentification
 
-## Navigation
-
-- Repository root: `README.md`
-- Configuration: `configs/hyperparams.yaml`
-- Dataset config: `dataset/data.yaml`
-- Requirements: `requirements.txt`, `requirements-gpu.txt`
-- Training script: `src/train.py`
-- Detection/inference script: `src/detect.py`
-
 ## Project structure
 
-Top-level layout and purpose of each item:
+This repository implements road asset detection (potholes, speed bumps, faded markings) using YOLOv8 (Ultralytics). Files and folders:
 
-- `configs/` – YAML configuration files controlling training hyperparameters and experiment settings. Edit `configs/hyperparams.yaml` to change learning rates, batch sizes, augmentation and other options.
-- `dataset/` – dataset configuration and manifests. `dataset/data.yaml` contains paths and dataset split information used by the training script.
-- `src/` – primary code for training and inference.
-	- `src/train.py` – training script. Trains the model using configs and dataset manifests.
-	- `src/detect.py` – detection / inference script. Run this to perform inference on images or video using trained weights.
-- `requirements.txt` – CPU/standard Python dependencies.
-- `requirements-gpu.txt` – GPU-enabled dependencies (a CUDA-capable PyTorch build and other GPU-accelerated libs). Use this if you have an NVIDIA GPU and compatible CUDA drivers.
+- `configs/`
+	- `hyperparams.yaml` — training hyperparameters used by the model (learning rate, augmentation, loss gains, etc.).
+- `dataset/`
+	- `data.yaml` — dataset manifest describing `path`, `train`, `val`, `test`, `nc` (number of classes) and `names` (class labels).
+		- Current placeholder values point to `./dataset/train/images`, `./dataset/val/images`, etc. Update these paths to your dataset layout.
+- `src/`
+	- `train.py` — training entrypoint. Uses `ultralytics.YOLO` to train a model. Key CLI flags: `--model`, `--epochs`, `--patience`, `--imgsz`, `--batch`, `--device`.
+	- `detect.py` — inference entrypoint. Uses `ultralytics.YOLO` to run inference. Key CLI flags: `--model`, `--source`, `--conf`, `--save`, `--show`.
+- `requirements.txt` — CPU-only Python dependencies.
+- `requirements-gpu.txt` — GPU (CUDA) compatible dependencies (points at PyTorch CUDA wheel index). Use only if you have matching NVIDIA drivers/CUDA.
 
 ## Getting started
 
-These instructions assume a Windows environment (PowerShell). Recommended Python: 3.8–3.11.
+The steps below show cloning the repo, creating a virtual environment (Windows and macOS examples), and installing dependencies.
 
 1) Clone the repository
 
@@ -33,89 +27,146 @@ cd RoadAssestIdentification
 git checkout main
 ```
 
-2) Create and activate a virtual environment (PowerShell)
+2) Create and activate a virtual environment
+
+Windows (PowerShell)
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
+macOS (bash/zsh)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 3) Install dependencies
 
-- If you do NOT have a CUDA-capable GPU or want the CPU-only install:
+- CPU-only (works on most machines, including macOS Intel/Apple Silicon if you choose a CPU PyTorch build):
 
 ```powershell
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-- If you have an NVIDIA GPU and want GPU-accelerated dependencies, ensure you have a compatible CUDA toolkit and drivers, then:
+- GPU (NVIDIA CUDA) — Windows/Linux with compatible drivers: the `requirements-gpu.txt` points to the PyTorch cu130 wheel index. Make sure your CUDA driver version is compatible with the wheel before installing.
 
 ```powershell
 pip install --upgrade pip
 pip install -r requirements-gpu.txt
 ```
 
-Notes:
-- If `requirements-gpu.txt` pins a CUDA-specific PyTorch wheel, ensure the wheel and your local CUDA driver are compatible.
-- If you run into dependency conflicts, consider using a fresh virtual environment or conda.
+Notes for macOS (Apple Silicon):
+- Recent PyTorch builds support MPS (Apple Metal). If you want GPU-like speed on M1/M2, follow https://pytorch.org/ and choose the macOS / MPS install option. Then install `ultralytics` and the other packages from `requirements.txt`.
+- Test PyTorch device availability on your machine:
 
-## Quick usage: training
-
-High-level contract for `src/train.py`:
-- Inputs: dataset manifest (`dataset/data.yaml`) and hyperparameter config (`configs/hyperparams.yaml`).
-- Outputs: trained model weights (usually written to a `runs/` or `weights/` folder) and training logs.
-
-A typical training run (example):
-
-```powershell
-# Example -- adjust flags to match your local scripts and config file names
-python src/train.py --data dataset/data.yaml --cfg configs/hyperparams.yaml
+```bash
+python -c "import torch; print('cuda', torch.cuda.is_available()); print('mps', getattr(torch.backends,'mps',None) and torch.backends.mps.is_available()); print(torch.__version__)"
 ```
 
-What to change:
-- Edit `configs/hyperparams.yaml` for learning rate, epochs, batch size and other options.
-- Edit `dataset/data.yaml` to point to your train/val/test image folders and label formats.
+## Training
 
-Common tips:
-- Use the GPU-enabled environment for faster training.
-- Reduce batch size if you run out of GPU memory.
+What the `train.py` script does
+- Loads a YOLO model (default `yolov8n.pt` but you can change it) using `ultralytics.YOLO` and calls `model.train(...)` with dataset `dataset/data.yaml` and hyperparameters from `configs/hyperparams.yaml` (you can edit that file for custom hyperparameters).
 
-## Quick usage: detection / inference
+Important details (from `src/train.py`)
+- Default model: `yolov8n.pt` (small, fast). You can pass larger models like `yolov8s.pt`, `yolov8m.pt`, `yolov8l.pt`, `yolov8x.pt` via `--model`.
+- Default storage: training uses `project='runs/detect'` and `name='train'`. The best weights are saved to `runs/detect/train/weights/best.pt` (the script prints the exact save path after training).
+- Device auto-detection: by default the script sets device to `cuda` if available, otherwise `cpu`. You can override with `--device`.
 
-High-level contract for `src/detect.py`:
-- Inputs: trained weights, source images/videos.
-- Outputs: detection results (annotated images, prediction files, or console output) depending on the script options.
+Example training commands
 
-A typical detection run (example):
+Windows (PowerShell)
 
 ```powershell
-# Example usage - replace <weights> and <source> with your paths
-python src/detect.py --weights runs/exp/weights/best.pt --source data/images/test.jpg --conf 0.25
+# simple train with defaults
+python src/train.py --model yolov8n.pt --epochs 100 --batch 16
+
+# specify device explicitly (cuda, cpu, 0, cuda:0)
+python src/train.py --model yolov8n.pt --epochs 50 --batch 8 --device cuda
 ```
 
-Notes:
-- If your script accepts video input, pass a video path or a webcam index (e.g. `--source 0`).
-- Adjust `--conf` (confidence threshold) or similar flags to tune precision/recall for inference.
+macOS (bash/zsh) — prefer `mps` if you installed an MPS-enabled PyTorch
+
+```bash
+python src/train.py --model yolov8n.pt --epochs 50 --batch 8 --device mps
+```
+
+Tuning notes
+- To change learning-rate, augmentation, or loss weights, edit `configs/hyperparams.yaml`.
+- If you run out of GPU memory, lower `--batch` and/or `--imgsz`.
+- Early stopping is controlled via `--patience`.
+
+## Inference / Detection
+
+What the `detect.py` script does
+- Loads a trained `.pt` model using `ultralytics.YOLO` and runs inference on the given source. Results are saved under `runs/detect/inference/` (project=name `inference`).
+
+Important CLI flags (from `src/detect.py`)
+- `--model` — path to the trained model `.pt` file (required)
+- `--source` — path to an image, video, or directory (required)
+- `--conf` — confidence threshold (default 0.25)
+- `--save` — whether to save results (default True)
+- `--show` — whether to display results interactively
+
+Example inference commands
+
+Windows (PowerShell)
+
+```powershell
+python src/detect.py --model runs/detect/train/weights/best.pt --source dataset/test/images/sample.jpg --conf 0.25 --save
+
+# run on webcam (if supported)
+python src/detect.py --model runs/detect/train/weights/best.pt --source 0 --conf 0.25 --show
+```
+
+macOS (bash/zsh)
+
+```bash
+python src/detect.py --model runs/detect/train/weights/best.pt --source dataset/test/images/sample.jpg --conf 0.25 --save
+```
+
+Output location
+- Inference outputs (images/videos with detections) are written to `runs/detect/inference/` by default. The training script saves best weights to `runs/detect/train/weights/best.pt`.
+
+## Dataset format
+
+- `dataset/data.yaml` is used by Ultralytics training API and should contain `path`, `train`, `val`, (optional `test`), `nc`, and `names`. Example (already present in repo):
+
+```yaml
+path: ./dataset
+train: train/images
+val: val/images
+test: test/images
+nc: 3
+names:
+	0: pothole
+	1: speed_bump
+	2: faded_marking
+```
+
+- Labels should follow the YOLO format (one txt file per image, class and normalized box coordinates), or adapt `data.yaml` and preprocessing accordingly.
 
 ## Troubleshooting
 
-- CUDA / GPU not detected: confirm CUDA drivers and that you installed GPU-specific dependencies. Run a simple PyTorch check:
+- PyTorch/CUDA not detected: ensure GPU drivers & CUDA toolkit are installed and compatible with the PyTorch wheel in `requirements-gpu.txt`. Check with:
 
 ```powershell
 python -c "import torch; print('cuda', torch.cuda.is_available()); print(torch.__version__)"
 ```
 
-- Dependency errors: create a fresh virtual environment and re-install. If a specific package fails, try installing it separately to get better error messages.
-
-<!-- ## Next steps and recommended improvements
-
-- Add an example `weights/` or `runs/` folder with a pre-trained model for quick inference tests.
-- Add a `scripts/` or `Makefile` for common commands (train, evaluate, detect).
-- Add unit tests or a minimal integration test that runs a tiny training loop to verify end-to-end functionality. -->
+- MPS (Apple Silicon) issues: use the official PyTorch macOS install instructions and test MPS availability as shown above.
+- Ultralytics errors: ensure `ultralytics` version is compatible with your installed PyTorch. If API changes, consult https://docs.ultralytics.com/.
+- Out of memory: reduce `--batch` and/or `--imgsz`, or train on a machine with more GPU memory.
 
 ## Credits
 
 Project: `RoadAssestIdentification` by AverageDude0716.
 
-If you want any changes to this README (more examples, expanded usage for specific flags, or adding quick start scripts), tell me which area to expand and I will update it.
+If you'd like, I can next:
+- Update `README` examples to include the exact `ultralytics` version or add quick `scripts/` wrappers for Windows/macOS.
+- Add an example dataset layout and a tiny smoke-test that runs a 1-epoch training on a couple of images.
+
