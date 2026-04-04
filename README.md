@@ -2,16 +2,14 @@
 
 ## Project structure
 
-This repository implements road asset detection (potholes, speed bumps, faded markings) using YOLOv8 (Ultralytics). Files and folders:
-
 - `configs/`
 	- `hyperparams.yaml` — training hyperparameters used by the model (learning rate, augmentation, loss gains, etc.).
 - `dataset/`
 	- `data.yaml` — dataset manifest describing `path`, `train`, `val`, `test`, `nc` (number of classes) and `names` (class labels).
-		- Current placeholder values point to `./dataset/train/images`, `./dataset/val/images`, etc. Update these paths to your dataset layout.
+    - Currently just a placeholder, soon to be replaced by the actual dataset
 - `src/`
-	- `train.py` — training entrypoint. Uses `ultralytics.YOLO` to train a model. Key CLI flags: `--model`, `--epochs`, `--patience`, `--imgsz`, `--batch`, `--device`.
-	- `detect.py` — inference entrypoint. Uses `ultralytics.YOLO` to run inference. Key CLI flags: `--model`, `--source`, `--conf`, `--save`, `--show`.
+	- `train.py` — training script. Uses `ultralytics.YOLO` to train a model. Key CLI flags: `--model`, `--epochs`, `--patience`, `--imgsz`, `--batch`, `--device`.
+	- `detect.py` — inference script. Uses `ultralytics.YOLO` to run inference. Key CLI flags: `--model`, `--source`, `--conf`, `--save`, `--show`.
 - `requirements.txt` — CPU-only Python dependencies.
 - `requirements-gpu.txt` — GPU (CUDA) compatible dependencies (points at PyTorch CUDA wheel index). Use only if you have matching NVIDIA drivers/CUDA.
 
@@ -134,7 +132,7 @@ Output location
 
 ## Dataset format
 
-- `dataset/data.yaml` is used by Ultralytics training API and should contain `path`, `train`, `val`, (optional `test`), `nc`, and `names`. Example (already present in repo):
+- `dataset/data.yaml` is used by Ultralytics training API and should contain `path`, `train`, `val`, (optional `test`), `nc`, and `names`. Example:
 
 ```yaml
 path: ./dataset
@@ -144,8 +142,8 @@ test: test/images
 nc: 3
 names:
 	0: pothole
-	1: speed_bump
-	2: faded_marking
+	1: railing
+	2: barrier
 ```
 
 - Labels should follow the YOLO format (one txt file per image, class and normalized box coordinates), or adapt `data.yaml` and preprocessing accordingly.
@@ -162,11 +160,4 @@ python -c "import torch; print('cuda', torch.cuda.is_available()); print(torch._
 - Ultralytics errors: ensure `ultralytics` version is compatible with your installed PyTorch. If API changes, consult https://docs.ultralytics.com/.
 - Out of memory: reduce `--batch` and/or `--imgsz`, or train on a machine with more GPU memory.
 
-## Credits
-
-Project: `RoadAssestIdentification` by AverageDude0716.
-
-If you'd like, I can next:
-- Update `README` examples to include the exact `ultralytics` version or add quick `scripts/` wrappers for Windows/macOS.
-- Add an example dataset layout and a tiny smoke-test that runs a 1-epoch training on a couple of images.
 
