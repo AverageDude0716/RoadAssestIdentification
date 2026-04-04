@@ -1,6 +1,7 @@
 import argparse
 import torch
 from ultralytics import YOLO
+import yaml
 
 def get_default_device():
     return 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -12,6 +13,9 @@ def train_model(model_name='yolov8n.pt', epochs=100, patience=10, img_size=640, 
     print(f"Using device: {device}")
     
     model = YOLO(model_name)
+
+    with open('configs/hyperparams.yaml', 'r') as f:
+        hyp = yaml.safe_load(f)
     
     results = model.train(
         data='dataset/data.yaml',
@@ -25,6 +29,7 @@ def train_model(model_name='yolov8n.pt', epochs=100, patience=10, img_size=640, 
         exist_ok=True,
         pretrained=True,
         verbose=True
+        **hyp
     )
     
     print(f"\nTraining completed! Best model saved at: {results.save_dir}/weights/best.pt")
