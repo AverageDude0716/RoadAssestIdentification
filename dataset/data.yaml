@@ -1,0 +1,15 @@
+# placeholder only
+
+path: ./dataset  # dataset root dir 
+train: train/images  # train images 
+val: val/images      # val images
+test: test/images    # test images (optional)
+
+# Number of classes
+nc: 3  
+
+# Class names 
+names:
+  0: pothole
+  1: railing
+  2: barrier

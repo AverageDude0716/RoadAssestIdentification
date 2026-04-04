@@ -25,8 +25,13 @@ build/
 # Training outputs
 runs/
 
-#ignore dataset if too big
-dataset/
+#ignore dataset images and labels if too big
+dataset/train/images/*
+dataset/train/labels/*
+dataset/val/images/*
+dataset/val/labels/*
+dataset/test/images/*
+dataset/test/labels/*
 
 # Model checkpoints
 *.pt
