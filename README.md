@@ -7,6 +7,7 @@
 - `dataset/`
 	- `data.yaml` — dataset manifest describing `path`, `train`, `val`, `test`, `nc` (number of classes) and `names` (class labels).
     - Currently just a placeholder, soon to be replaced by the actual dataset
+    - ignored by git because of size
 - `src/`
 	- `train.py` — training script. Uses `ultralytics.YOLO` to train a model. Key CLI flags: `--model`, `--epochs`, `--patience`, `--imgsz`, `--batch`, `--device`.
 	- `detect.py` — inference script. Uses `ultralytics.YOLO` to run inference. Key CLI flags: `--model`, `--source`, `--conf`, `--save`, `--show`.
