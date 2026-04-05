@@ -28,7 +28,7 @@ def train_model(model_name='yolov8n.pt', epochs=100, patience=10, img_size=640, 
         name='train',
         exist_ok=True,
         pretrained=True,
-        verbose=True
+        verbose=True,
         **hyp
     )
     
