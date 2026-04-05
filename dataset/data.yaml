@@ -1,15 +1,21 @@
-# placeholder only
-
-path: ./dataset  # dataset root dir 
-train: train/images  # train images 
-val: val/images      # val images
-test: test/images    # test images (optional)
-
-# Number of classes
-nc: 3  
-
-# Class names 
+train: train/images
+val: val/images
+test: test/images
+nc: 16
 names:
-  0: pothole
-  1: railing
-  2: barrier
+- Barriers
+- Crosswalks
+- Planters and Bushes
+- Sign pole
+- Water-Filled Cushions
+- bus stop
+- directional arrows
+- lamp pole
+- manhole
+- road divider
+- tactile paving
+- traffic lights
+- Road markings
+- Potholes and damages
+- Railings
+- Road signs

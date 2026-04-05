@@ -6,7 +6,7 @@
 	- `hyperparams.yaml` — training hyperparameters used by the model.
 - `dataset/`
 	- `data.yaml` — dataset configuration file describing `path`, `train`, `val`, `test`, `nc` (number of classes) and `names` (class labels).
-    - Currently just a placeholder, soon to be replaced by the actual dataset
+    - Replace the dataset folder with the actual dataset. Dataset link: https://drive.google.com/drive/folders/1WI52-rTF0oIehQDxgmm32x1DnFiV85ll?usp=sharing
     - contents are ignored by gitignore because of size excecpt data.yaml
 - `src/`
 	- `train.py` — training script. Uses `ultralytics.YOLO` to train a model.
